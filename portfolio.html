@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Portfolio | Computer Engineer</title>
+    
+    <!-- Core Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0/particles.min.js"></script>
+
+    <style>
+        :root {
+            --neon-blue: #00f7ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0a192f;
+            --darker-bg: #060c17;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark-bg);
+            color: #e6f1ff;
+        }
+
+          /* Remove global fixed background; we'll use per-section fixed-positioned
+              pseudo-elements so each section can show a different vertical crop
+              of the same full-body photo as the user scrolls. */
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            /* reserve top space equal to the navbar height so hero content isn't hidden */
+            padding-top: var(--nav-offset-px, 0px);
+        }
+
+        .neon-border {
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .skill-card {
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.3);
+        }
+
+        .project-card {
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: scale(1.02);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.2);
+        }
+
+        .nav-link {
+            position: relative;
+            color: #e6f1ff;
+            text-decoration: none;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: var(--neon-blue);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .section-heading {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Use user's photo as background for the navigation bar and the home (hero) section.
+           The image file `My.jpg` should be placed next to this HTML file (same folder).
+           If you prefer an absolute path, use file:///C:/Users/dell/Pictures/My.jpg instead of 'My.jpg'. */
+
+        nav {
+            /* keep nav positioned so its pseudo-element can show the image */
+            position: relative;
+            background-color: rgba(10,25,47,0.6);
+        }
+
+        /* nav remains semi-transparent so the fixed body background shows through */
+        nav > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero/home background — covers the full hero area. background-attachment: fixed gives a parallax-like feel. */
+        #home {
+            position: relative;
+            overflow: hidden;
+            /* Ensure text is readable on top of the image */
+            color: #e6f1ff;
+        }
+
+        /* hero content stays above the fixed background */
+        #home > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Reusable per-section fixed background layer. Each section uses a CSS
+           custom property --bg-y to control which vertical slice of the image
+           is visible. The pseudo-element is absolute but the background is
+           attached to the viewport (fixed) so the image doesn't scroll with the section. */
+        .section-with-bg {
+            position: relative;
+            overflow: hidden;
+            color: #e6f1ff;
+        }
+
+        /* removed per-section pseudo-element; we'll use a single fixed background layer */
+
+        /* Fixed background layer controlled via JS for smooth transitions */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url('My.jpg');
+            background-size: cover;
+            /* vertical position controlled by --bg-pos (percentage) plus a pixel nav offset
+               so the visible image starts below the navbar regardless of viewport size */
+            background-position: center calc(var(--bg-pos, 18%) + var(--nav-offset-px, 0px));
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* section content must sit above the pseudo-element */
+        .section-with-bg > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Assign vertical positions for each section so the image reveals
+           the requested body parts as the user scrolls. Adjust percentages
+           if you want to fine-tune the crop. */
+    /* Further nudge home crop so the very top of the face is fully visible under the navbar. */
+    #home.section-with-bg { --bg-y: 1%; }     /* face -> chest */
+        #about.section-with-bg { --bg-y: 36%; }    /* chest -> stomach */
+        #skills.section-with-bg { --bg-y: 56%; }   /* stomach -> knee */
+        #projects.section-with-bg { --bg-y: 92%; } /* knee -> lower leg */
+    #contact.section-with-bg { --bg-y: 100%; }  /* lower leg / feet */
+    /* end section removed */
+    </style>
+</head>
+<body class="min-h-screen" 
+      x-data="{ 
+          isOpen: false,
+          typewriter: {
+              text: '< Building the future, one line of code at a time />',
+              displayText: '',
+              currentIndex: 0,
+              isPaused: false,
+              init() {
+                  this.typeText();
+              },
+              typeText() {
+                  if (this.currentIndex < this.text.length) {
+                      this.displayText += this.text[this.currentIndex];
+                      this.currentIndex++;
+                      setTimeout(() => this.typeText(), 100);
+                  } else {
+                      setTimeout(() => {
+                          this.displayText = '';
+                          this.currentIndex = 0;
+                          this.typeText();
+                      }, 2000);
+                  }
+              }
+          }
+      }">
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-opacity-90 bg-[#0a192f] backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-[#00f7ff]">&lt;CE/&gt;</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 text-sm font-medium">Home</a>
+                        <a href="#about" class="nav-link px-3 py-2 text-sm font-medium">About</a>
+                        <a href="#skills" class="nav-link px-3 py-2 text-sm font-medium">Skills</a>
+                        <a href="#projects" class="nav-link px-3 py-2 text-sm font-medium">Projects</a>
+                        <a href="#contact" class="nav-link px-3 py-2 text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button @click="isOpen = !isOpen" class="text-gray-300 hover:text-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path x-show="!isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            <path x-show="isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div x-show="isOpen" class="md:hidden bg-[#0a192f] bg-opacity-90 backdrop-blur-md">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" @click="isOpen = false" class="block px-3 py-2 text-base font-medium nav-link">Home</a>
+                <a href="#about" @click="isOpen = false" class="block px-3 py-2 text-base font-medium nav-link">About</a>
+                <a href="#skills" @click="isOpen = false" class="block px-3 py-2 text-base font-medium nav-link">Skills</a>
+                <a href="#projects" @click="isOpen = false" class="block px-3 py-2 text-base font-medium nav-link">Projects</a>
+                <a href="#contact" @click="isOpen = false" class="block px-3 py-2 text-base font-medium nav-link">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <!-- Hero Section -->
+         
+    <section id="home" class="min-h-screen flex items-center justify-center px-4 section-with-bg">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-4 animate__animated animate__fadeIn">
+                    <span class="text-[#00f7ff]">Computer Engineering</span> Graduate
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 animate__animated animate__fadeIn animate__delay-1s code-font">
+                    <span x-text="typewriter.displayText" x-init="typewriter.init()"></span>
+                </p>
+                <a href="#contact" class="inline-block px-8 py-3 border-2 border-[#00f7ff] text-[#00f7ff] rounded-lg hover:bg-[#00f7ff] hover:text-[#0a192f] transition-all duration-300 animate__animated animate__fadeIn animate__delay-2s">
+                    Let's Connect
+                </a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+    <section id="about" class="py-20 px-4 section-with-bg">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="section-heading text-3xl font-bold mb-8">About Me</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4">
+                        <p class="text-lg">
+                            As a recent Computer Engineering graduate, I combine hardware expertise with software innovation to create cutting-edge solutions. My passion lies in bridging the gap between hardware and software, developing efficient and scalable systems.
+                        </p>
+                        <p class="text-lg">
+                            I specialize in embedded systems, digital design, and full-stack development, bringing a unique perspective to technical challenges.
+                        </p>
+                    </div>
+                    <div class="skill-card p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">Quick Facts</h3>
+                        <ul class="space-y-2">
+                            <li><i class="fas fa-graduation-cap mr-2"></i> B.E. Computer Engineering</li>
+                            <li><i class="fas fa-code mr-2"></i> Full-Stack Developer</li>
+                            <li><i class="fas fa-microchip mr-2"></i> Hardware Enthusiast</li>
+                            <li><i class="fas fa-robot mr-2"></i> AI/ML Explorer</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <section id="skills" class="py-20 px-4 section-with-bg">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="section-heading text-3xl font-bold mb-8">My Skills</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="skill-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">Programming Languages</h3>
+                <ul class="space-y-2">
+                    <li>JavaScript</li>
+                    <li>Python</li>
+                    <li>C/C++</li>
+                    <li>Java</li>
+                </ul>
+            </div>
+            <div class="skill-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">Web Development</h3>
+                <ul class="space-y-2">
+                    <li>HTML/CSS</li>
+                    <li>React</li>
+                    <li>Node.js</li>
+                    <li>RESTful APIs</li>
+                </ul>
+            </div>
+            <div class="skill-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">Hardware & Embedded</h3>
+                <ul class="space-y-2">
+                    <li>Verilog</li>
+                    <li>Raspberry Pi</li>
+                    <li>Arduino</li>
+                    <li>Microcontrollers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="projects" class="py-20 px-4 section-with-bg">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="section-heading text-3xl font-bold mb-8">Featured Projects</h2>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="project-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">Smart Home Automation</h3>
+                <p>An IoT project using Raspberry Pi for controlling home appliances remotely.</p>
+            </div>
+            <div class="project-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-[#00f7ff]">E-commerce Website</h3>
+                <p>Full-stack web application for online shopping with payment integration.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="contact" class="py-20 px-4 section-with-bg">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="section-heading text-3xl font-bold mb-8">Contact Me</h2>
+        <p class="text-lg">Ready to start a conversation? Reach out to me through the form below!</p>
+        <form class="mt-6">
+            <input type="text" placeholder="Your Name" class="w-full rounded-lg p-3 mt-2 bg-[#0a192f] border border-[#00f7ff] text-[#e6f1ff]">
+            <textarea placeholder="Your Message" rows="5" class="w-full rounded-lg p-3 mt-2 bg-[#0a192f] border border-[#00f7ff] text-[#e6f1ff]"></textarea>
+            <button type="submit" class="w-full bg-[#00f7ff] text-[#0a192f] rounded-lg p-3 mt-4 transition-all duration-300 hover:bg-[#0a192f] hover:text-[#00f7ff]">
+                Send Message
+            </button>
+        </form>
+        <p class="mt-4 text-sm text-[#00f7ff]">Feel free to drop me an email at <span class="font-bold">youremail@example.com</span></p>
+    </div>
+</section>
+<section id="contact" class="py-20 px-4 section-with-bg">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="section-heading text-3xl font-bold mb-8">Get in Touch</h2>
+        <p class="text-lg">Have a project in mind or just want to chat about tech? Drop me a message!</p>
+        <form class="mt-6">
+            <input type="text" placeholder="Your Name" class="w-full rounded-lg p-3 mt-2 bg-[#0a192f] border border-[#00f7ff] text-[#e6f1ff]">
+            <textarea placeholder="Your Message" rows="5" class="w-full rounded-lg p-3 mt-2 bg-[#0a192f] border border-[#00f7ff] text-[#e6f1ff]"></textarea>
+            <button type="submit" class="w-full bg-[#00f7ff] text-[#0a192f] rounded-lg p-3 mt-4 transition-all duration-300 hover:bg-[#0a192f] hover:text-[#00f7ff]">
+                Send Message
+            </button>
+        </form>
+        <p class="mt-4 text-sm text-[#00f7ff]">Feel free to reach out through email at <span class="font-bold">youremail@example.com</span></p>
+    </div>
+</section>
+    
+    <script>
+        // Smooth background-position controller
+        (function(){
+            const sections = Array.from(document.querySelectorAll('.section-with-bg'));
+            if(!sections.length) return;
+
+            // parse --bg-y from each section into a number (percentage)
+            function parseBgY(el){
+                const val = getComputedStyle(el).getPropertyValue('--bg-y') || '50%';
+                return parseFloat(val.replace('%','')) || 50;
+            }
+
+            let stops = [];
+            function calcStops(){
+                stops = sections.map(s=>({
+                    el: s,
+                    top: s.offsetTop,
+                    height: s.offsetHeight,
+                    bg: parseBgY(s)
+                }));
+            }
+
+            // find interpolation target based on viewport center
+            function getTargetBg(){
+                const center = window.scrollY + window.innerHeight/2;
+                // if before first or after last, clamp
+                if(center <= stops[0].top) return stops[0].bg;
+                const last = stops[stops.length-1];
+                if(center >= last.top + last.height) return last.bg;
+
+                for(let i=0;i<stops.length-1;i++){
+                    const a = stops[i];
+                    const b = stops[i+1];
+                    const start = a.top;
+                    const end = b.top + b.height; // ensure overlap covers entry
+                    if(center >= a.top && center <= b.top + b.height){
+                        // compute local t between a.top and b.top
+                        const span = (b.top - a.top) || 1;
+                        const t = Math.min(Math.max((center - a.top)/span,0),1);
+                        return a.bg + (b.bg - a.bg)*t;
+                    }
+                }
+                return 50;
+            }
+
+            let current = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bg-pos')) || 18;
+            let target = current;
+            let ticking = false;
+
+            function onScroll(){
+                target = getTargetBg();
+                if(!ticking){
+                    requestAnimationFrame(update);
+                    ticking = true;
+                }
+            }
+
+            function update(){
+                // smooth towards target
+                current += (target - current) * 0.12; // easing factor
+                document.documentElement.style.setProperty('--bg-pos', current + '%');
+                // keep animating while not close enough
+                if(Math.abs(target - current) > 0.01){
+                    requestAnimationFrame(update);
+                } else {
+                    ticking = false;
+                }
+            }
+
+            // calculate nav offset (as percentage of viewport height) and set CSS vars
+            function updateNavOffset(){
+                const nav = document.querySelector('nav');
+                if(!nav) {
+                    document.documentElement.style.setProperty('--nav-offset','0%');
+                    document.documentElement.style.setProperty('--nav-offset-px','0px');
+                    return;
+                }
+                const rect = nav.getBoundingClientRect();
+                const h = rect.height || 0;
+                const pct = (h / window.innerHeight) * 100;
+                document.documentElement.style.setProperty('--nav-offset', pct + '%');
+                document.documentElement.style.setProperty('--nav-offset-px', h + 'px');
+            }
+
+            window.addEventListener('resize',()=>{ calcStops(); updateNavOffset(); onScroll(); });
+            window.addEventListener('load',()=>{ calcStops(); updateNavOffset(); onScroll(); });
+            window.addEventListener('scroll', onScroll, {passive:true});
+            // initial calc
+            calcStops();
+            // set initial bg-pos to the home section value
+            const initial = parseBgY(sections[0]);
+            document.documentElement.style.setProperty('--bg-pos', initial + '%');
+            current = initial;
+            target = initial;
+        })();
+    </script>
